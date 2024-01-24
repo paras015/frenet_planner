@@ -76,11 +76,12 @@ inline double FrenetPath::get_Js()
 	return Js;
 }
 
-bool check_path(FrenetPath fp);
+bool check_path(FrenetPath fp, std::vector<vecDouble> obstacles);
+bool check_collision(double x, double y, std::vector<vecDouble> obstacles);
 FrenetPath calculate_global_path(FrenetPath fp, cubic_spline::CubicSpline2D spline);
 FrenetPath frenet_optimal_path(cubic_spline::CubicSpline2D spline, double current_pos, double current_speed, 
                                 double current_accel, double current_lat_pos, double current_lat_speed,
-                                double current_lat_accel);
+                                double current_lat_accel, std::vector<vecDouble> obstacles);
 } // namespace frenet_planner
 
 #endif //FRENET_PLANNER_HPP_

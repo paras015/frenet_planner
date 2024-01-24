@@ -111,7 +111,7 @@ void FrenetPath::adding_global_path(cubic_spline::CubicSpline2D spline)
         spline.calculatePositions(ix, iy, s[i]);
         if (ix == NONE)
         {
-            return;
+           break;;
         }
         double iyaw = spline.calc_yaw(s[i]);
         double fx = ix - d[i] * sin(iyaw);
@@ -122,8 +122,7 @@ void FrenetPath::adding_global_path(cubic_spline::CubicSpline2D spline)
 
     yaw.resize(0);
 	ds.resize(0);
-
-    for (int i = 0; i < n - 1; i++)
+    for (int i = 0; i < x.size() - 1; i++)
 	{
         double dx = x[i + 1] - x[i];
 		double dy = y[i + 1] - y[i];
@@ -146,13 +145,26 @@ void FrenetPath::adding_global_path(cubic_spline::CubicSpline2D spline)
 
     c.resize(0);
 
-    for (int i = 0; i < (n - 1) - 1; i++)
+    for (int i = 0; i < (x.size() - 1) - 1; i++)
 	{
         c.push_back((yaw[i + 1] - yaw[i]) / ds[i]);
 	}
 }
 
-bool check_path(FrenetPath fp)
+bool check_collision(double x, double y, std::vector<vecDouble> obstacles)
+{
+    for (int i = 0; i < obstacles.size(); i++)
+    {
+        double dist = sqrt(std::pow(x - obstacles[i][0], 2) + std::pow(y - obstacles[i][1], 2));
+        if (dist <= std::pow(ROBOT_RADIUS, 2))
+        {
+            return 1;
+        }
+    }
+    return 0;
+} 
+
+bool check_path(FrenetPath fp, std::vector<vecDouble> obstacles)
 {
     for (int i = 0; i < fp.s_d.size(); i++)
     {
@@ -178,6 +190,14 @@ bool check_path(FrenetPath fp)
         }
     }
 
+    for (int i = 0; i < fp.x.size(); i++)
+    {
+        if(check_collision(fp.x[i], fp.y[i], obstacles))
+        {
+            return 0;
+        }
+    }
+
 	return 1;
 }
 
@@ -198,7 +218,7 @@ inline bool sortByCost(FrenetPath &a, FrenetPath &b)
 
 FrenetPath frenet_optimal_path(cubic_spline::CubicSpline2D spline, double current_pos, double current_speed, 
                                 double current_accel, double current_lat_pos, double current_lat_speed,
-                                double current_lat_accel)
+                                double current_lat_accel, std::vector<vecDouble> obstacles)
 {
     static FrenetPath bestpath;
     std::vector<FrenetPath> fplist = FPList(current_speed, current_accel, current_lat_pos, current_lat_speed, current_lat_accel, current_pos).fplist_paths;
@@ -210,7 +230,7 @@ FrenetPath frenet_optimal_path(cubic_spline::CubicSpline2D spline, double curren
     }
     for (int i = 0; i < fplist.size(); i++)
     {
-        if (check_path(fplist[i]))
+        if (check_path(fplist[i], obstacles))
         {
             bestpath = fplist[i];
             break;
@@ -257,8 +277,13 @@ int main(int argc, char **argv)
     double current_speed = 10 / 3.6;
     double current_accel = 0.0;
 
-    vecDouble way_x{0.0, 10.0, 20, 30.0, 40, 45, 40, 30, 20, 10, 0, 10, 20};
-    vecDouble way_y{0.0, -6.0, -10, -5, 0, 10, 20, 25, 30, 35, 40, 50, 60};
+    vecDouble way_x{0, 10, 20, 30, 40, 45, 40, 30, 20, 
+                    10, 0, -5, 0, 10, 20, 30, 40, 45, 30, 10, -5, -3};
+    vecDouble way_y{0, -6, -10, -5, 0, 10, 20, 25, 
+                    30, 35, 40, 50, 60, 65, 70, 65, 55, 45, 35, 20, 10, 3};
+    std::vector<vecDouble> obstacles{{20.0, -10.0},
+                                    {30.0, -5.0},
+                                    {40.0, 40.0}};
     vecDouble rx, ry, ryaw, rk;
     double ds = 0.1;
 
@@ -266,7 +291,7 @@ int main(int argc, char **argv)
 
     for (int step = 0; step < SIM_LOOP; step++) {
         frenet_planner::FrenetPath path = frenet_planner::frenet_optimal_path(spline, current_pos, current_speed, current_accel,
-                                            current_lat_pos, current_lat_speed, current_lat_accel);
+                                            current_lat_pos, current_lat_speed, current_lat_accel, obstacles);
         current_pos = path.s[1];
         current_lat_pos = path.d[1];
         current_lat_speed = path.d_d[1];
@@ -277,10 +302,23 @@ int main(int argc, char **argv)
         plt::plot(path.x, path.y, "r--");
         vecDouble x1{path.x[1]};
         vecDouble y1{path.y[1]};
+        vecDouble x1_y{cos(path.yaw[1])};
+        vecDouble y1_y{sin(path.yaw[1])};
         plt::plot(x1, y1, "ro");
+        vecDouble ob_x;
+        vecDouble ob_y;
+        for (int i = 0; i < obstacles.size(); i++)
+        {
+            ob_x.push_back(obstacles[i][0]);
+            ob_y.push_back(obstacles[i][1]);
+        }
+        plt::plot(ob_x, ob_y, "xb");
+        plt::quiver(x1, y1, x1_y, y1_y);
+        plt::xlim(path.x[1] - 20, path.x[1] + 20);
+        plt::ylim(path.y[1] - 20, path.y[1] + 20);
         plt::pause(0.001);
         double dist = std::pow(path.x[1] - rx.back(), 2) + std::pow(path.y[1] - ry.back(), 2);
-        if (dist <= 3)
+        if (dist <= 1)
         {
             std::cout << "REACHED GOAL !!" << std::endl;
             break;
