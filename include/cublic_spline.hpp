@@ -2,6 +2,7 @@
 #define CUBIC_SPLINE_HPP_
 
 #include <eigen3/Eigen/Dense>
+#include <iostream>
 #include <vector>
 
 #define NONE -1e9
@@ -22,6 +23,8 @@ private:
 public:
     void init(vecDouble x_in, vecDouble y_in);
     double calculate(double t);
+    double calcd(double t);
+    double calcdd(double t);
 };
 
 class CubicSpline2D
@@ -43,6 +46,8 @@ public:
     vecDouble calcS(vecDouble x, vecDouble y);
     double getLastS();
     void calculatePositions(double &x, double &y, double t);
+    double calc_yaw(double t);
+    double calc_curvature(double t);
 };
 
 CubicSpline2D calc_spline_course(vecDouble way_x, vecDouble way_y, vecDouble &rx, 

@@ -94,6 +94,38 @@ double CubicSpline1D::calculate(double t)
 	return result;
 }
 
+double CubicSpline1D::calcd(double t)
+{
+	if (t < x[0])
+	{
+		return NONE;
+	}
+	else if (t > x[nx - 1])
+	{
+		return NONE;
+	}
+	int i = search_index(t);
+	double dx = t - x[i];
+	double result = b[i] + 2 * c[i] * dx + 3 * d[i] * dx * dx;
+
+	return result;
+}
+
+double CubicSpline1D::calcdd(double t)
+{
+	if (t < x[0])
+		return NONE;
+	else if (t > x[nx - 1])
+		return NONE;
+
+	int i = search_index(t);
+
+	double dx = t - x[i];
+	double result = 2 * c[i] + 6 * d[i] * dx;
+
+	return result;
+}
+
 vecDouble CubicSpline2D::calcS(vecDouble x, vecDouble y)
 {
     vecDouble dx, dy, ds, s;
@@ -128,10 +160,32 @@ double CubicSpline2D::getLastS()
     return s.back();
 }
 
+double CubicSpline2D::calc_yaw(double t)
+{
+	double dx = sx.calcd(t);
+	double dy = sy.calcd(t);
+	double yaw = atan2(dy, dx);
+
+	return yaw;
+}
+
 void CubicSpline2D::calculatePositions(double &x, double &y, double t)
 {
     x = sx.calculate(t);
 	y = sy.calculate(t);
+}
+
+double CubicSpline2D::calc_curvature(double t)
+{
+	double dx = sx.calcd(t);
+	double ddx = sx.calcdd(t);
+
+	double dy = sy.calcd(t);
+	double ddy = sy.calcdd(t);
+
+	double k = (ddy * dx - ddx * dy) / (dx * dx + dy * dy);
+
+	return k;
 }
 
 CubicSpline2D calc_spline_course(vecDouble way_x, vecDouble way_y, vecDouble &rx, 
@@ -164,6 +218,8 @@ CubicSpline2D calc_spline_course(vecDouble way_x, vecDouble way_y, vecDouble &rx
         spline.calculatePositions(ix, iy, s[i]);
         rx[i] = ix;
 		ry[i] = iy;
+        ryaw[i] = spline.calc_yaw(s[i]);
+		rk[i] = spline.calc_curvature(s[i]);
     }
     return spline;
 }

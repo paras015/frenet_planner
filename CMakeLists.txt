@@ -5,7 +5,7 @@ SET (PYTHON_PATH "/usr/include/python2.7/")
 find_package(PythonLibs 2.7)
 find_package(Eigen3 REQUIRED)
 
-add_executable(frenet_planner src/frenet_planner.cpp src/cubic_spline.cpp)
+add_executable(frenet_planner src/frenet_planner.cpp src/cubic_spline.cpp src/polynomials.cpp)
 target_include_directories(frenet_planner PRIVATE include)
 target_link_libraries(frenet_planner 
                       Eigen3::Eigen
