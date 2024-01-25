@@ -311,6 +311,7 @@ int main(int argc, char **argv)
         current_accel = path.s_dd[1];
         plt::plot(rx,ry);
         plt::plot(path.x, path.y, "r--");
+        plt::title("Speed : " + std::to_string(current_speed));
         vecDouble x1{path.x[1]};
         vecDouble y1{path.y[1]};
         vecDouble x1_y{cos(current_yaw)};
