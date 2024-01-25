@@ -94,7 +94,7 @@ double CubicSpline1D::calculate(double t)
 	return result;
 }
 
-double CubicSpline1D::calcd(double t)
+double CubicSpline1D::calc_d(double t)
 {
 	if (t < x[0])
 	{
@@ -111,7 +111,7 @@ double CubicSpline1D::calcd(double t)
 	return result;
 }
 
-double CubicSpline1D::calcdd(double t)
+double CubicSpline1D::calc_dd(double t)
 {
 	if (t < x[0])
 		return NONE;
@@ -126,7 +126,7 @@ double CubicSpline1D::calcdd(double t)
 	return result;
 }
 
-vecDouble CubicSpline2D::calcS(vecDouble x, vecDouble y)
+vecDouble CubicSpline2D::calc_s(vecDouble x, vecDouble y)
 {
     vecDouble dx, dy, ds, s;
 
@@ -155,21 +155,21 @@ vecDouble CubicSpline2D::calcS(vecDouble x, vecDouble y)
     return s;
 }
 
-double CubicSpline2D::getLastS()
+double CubicSpline2D::get_last_s()
 {
     return s.back();
 }
 
 double CubicSpline2D::calc_yaw(double t)
 {
-	double dx = sx.calcd(t);
-	double dy = sy.calcd(t);
+	double dx = sx.calc_d(t);
+	double dy = sy.calc_d(t);
 	double yaw = atan2(dy, dx);
 
 	return yaw;
 }
 
-void CubicSpline2D::calculatePositions(double &x, double &y, double t)
+void CubicSpline2D::calculate_positions(double &x, double &y, double t)
 {
     x = sx.calculate(t);
 	y = sy.calculate(t);
@@ -177,11 +177,11 @@ void CubicSpline2D::calculatePositions(double &x, double &y, double t)
 
 double CubicSpline2D::calc_curvature(double t)
 {
-	double dx = sx.calcd(t);
-	double ddx = sx.calcdd(t);
+	double dx = sx.calc_d(t);
+	double ddx = sx.calc_dd(t);
 
-	double dy = sy.calcd(t);
-	double ddy = sy.calcdd(t);
+	double dy = sy.calc_d(t);
+	double ddy = sy.calc_dd(t);
 
 	double k = (ddy * dx - ddx * dy) / (dx * dx + dy * dy);
 
@@ -193,7 +193,7 @@ CubicSpline2D calc_spline_course(vecDouble way_x, vecDouble way_y, vecDouble &rx
 {
     CubicSpline2D spline(way_x, way_y);
     vecDouble s;
-    double sRange = spline.getLastS();
+    double sRange = spline.get_last_s();
     double sInc = 0;
 
     while (1)
@@ -215,7 +215,7 @@ CubicSpline2D calc_spline_course(vecDouble way_x, vecDouble way_y, vecDouble &rx
     for (int i = 0; i < s.size(); i++)
     {
         double ix, iy;
-        spline.calculatePositions(ix, iy, s[i]);
+        spline.calculate_positions(ix, iy, s[i]);
         rx[i] = ix;
 		ry[i] = iy;
         ryaw[i] = spline.calc_yaw(s[i]);

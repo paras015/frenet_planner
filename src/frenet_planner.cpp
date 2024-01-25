@@ -108,7 +108,7 @@ void FrenetPath::adding_global_path(cubic_spline::CubicSpline2D spline)
     for (int i = 0; i < n; i++)
     {
         double ix, iy;
-        spline.calculatePositions(ix, iy, s[i]);
+        spline.calculate_positions(ix, iy, s[i]);
         if (ix == NONE)
         {
            break;;

@@ -23,8 +23,8 @@ private:
 public:
     void init(vecDouble x_in, vecDouble y_in);
     double calculate(double t);
-    double calcd(double t);
-    double calcdd(double t);
+    double calc_d(double t);
+    double calc_dd(double t);
 };
 
 class CubicSpline2D
@@ -38,14 +38,14 @@ public:
     {
         x = way_x;
         y = way_y;
-        s = calcS(x, y);
+        s = calc_s(x, y);
         sx.init(s, x);
         sy.init(s, y);
     }
 
-    vecDouble calcS(vecDouble x, vecDouble y);
-    double getLastS();
-    void calculatePositions(double &x, double &y, double t);
+    vecDouble calc_s(vecDouble x, vecDouble y);
+    double get_last_s();
+    void calculate_positions(double &x, double &y, double t);
     double calc_yaw(double t);
     double calc_curvature(double t);
 };
