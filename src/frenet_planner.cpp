@@ -277,6 +277,10 @@ int main(int argc, char **argv)
     double current_speed = 10 / 3.6;
     double current_accel = 0.0;
 
+    double current_phi = 0.0;
+    double current_yaw = 0.0;
+    double current_omega = 0.0;
+
     vecDouble way_x{0, 10, 20, 30, 40, 45, 40, 30, 20, 
                     10, 0, -5, 0, 10, 20, 30, 40, 45, 30, 10, -5, -3};
     vecDouble way_y{0, -6, -10, -5, 0, 10, 20, 25, 
@@ -292,6 +296,15 @@ int main(int argc, char **argv)
     for (int step = 0; step < SIM_LOOP; step++) {
         frenet_planner::FrenetPath path = frenet_planner::frenet_optimal_path(spline, current_pos, current_speed, current_accel,
                                             current_lat_pos, current_lat_speed, current_lat_accel, obstacles);
+        
+        // trailer dynamics
+        
+        // double vt = (current_speed * sin(current_yaw - current_phi)) + (3 * current_omega * cos(current_yaw - current_phi));
+        // current_omega = ((current_speed * sin(current_yaw - current_phi)) - (3 * current_omega * cos(current_yaw - current_phi))) / 4;
+        // current_phi = current_phi + (DT * current_omega);
+        // vt = current_speed + vt;
+
+        current_yaw = path.yaw[1];
         current_pos = path.s[1];
         current_lat_pos = path.d[1];
         current_lat_speed = path.d_d[1];
@@ -302,8 +315,10 @@ int main(int argc, char **argv)
         plt::plot(path.x, path.y, "r--");
         vecDouble x1{path.x[1]};
         vecDouble y1{path.y[1]};
-        vecDouble x1_y{cos(path.yaw[1])};
-        vecDouble y1_y{sin(path.yaw[1])};
+        vecDouble x1_y{cos(current_yaw)};
+        vecDouble y1_y{sin(current_yaw)};
+        // vecDouble x1_t{cos(current_phi)};
+        // vecDouble y1_t{sin(current_phi)};
         plt::plot(x1, y1, "ro");
         vecDouble ob_x;
         vecDouble ob_y;
@@ -313,7 +328,8 @@ int main(int argc, char **argv)
             ob_y.push_back(obstacles[i][1]);
         }
         plt::plot(ob_x, ob_y, "xb");
-        plt::quiver(x1, y1, x1_y, y1_y);
+        plt::quiver(x1, y1, x1_y, y1_y); // car yaw
+        // plt::quiver(x1, y1, x1_t, y1_t); // trailer yaw
         plt::xlim(path.x[1] - 20, path.x[1] + 20);
         plt::ylim(path.y[1] - 20, path.y[1] + 20);
         plt::pause(0.001);
