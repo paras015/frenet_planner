@@ -111,21 +111,6 @@ double CubicSpline1D::calc_d(double t)
 	return result;
 }
 
-double CubicSpline1D::calc_dd(double t)
-{
-	if (t < x[0])
-		return NONE;
-	else if (t > x[nx - 1])
-		return NONE;
-
-	int i = search_index(t);
-
-	double dx = t - x[i];
-	double result = 2 * c[i] + 6 * d[i] * dx;
-
-	return result;
-}
-
 vecDouble CubicSpline2D::calc_s(vecDouble x, vecDouble y)
 {
     vecDouble dx, dy, ds, s;
@@ -175,21 +160,8 @@ void CubicSpline2D::calculate_positions(double &x, double &y, double t)
 	y = sy.calculate(t);
 }
 
-double CubicSpline2D::calc_curvature(double t)
-{
-	double dx = sx.calc_d(t);
-	double ddx = sx.calc_dd(t);
-
-	double dy = sy.calc_d(t);
-	double ddy = sy.calc_dd(t);
-
-	double k = (ddy * dx - ddx * dy) / (dx * dx + dy * dy);
-
-	return k;
-}
-
 CubicSpline2D calc_spline_course(vecDouble way_x, vecDouble way_y, vecDouble &rx, 
-                                vecDouble &ry, vecDouble &ryaw, vecDouble &rk, double ds)
+                                vecDouble &ry, vecDouble &ryaw, double ds)
 {
     CubicSpline2D spline(way_x, way_y);
     vecDouble s;
@@ -210,7 +182,6 @@ CubicSpline2D calc_spline_course(vecDouble way_x, vecDouble way_y, vecDouble &rx
     rx.resize(s.size());
     ry.resize(s.size());
     ryaw.resize(s.size());
-    rk.resize(s.size());
 
     for (int i = 0; i < s.size(); i++)
     {
@@ -219,7 +190,6 @@ CubicSpline2D calc_spline_course(vecDouble way_x, vecDouble way_y, vecDouble &rx
         rx[i] = ix;
 		ry[i] = iy;
         ryaw[i] = spline.calc_yaw(s[i]);
-		rk[i] = spline.calc_curvature(s[i]);
     }
     return spline;
 }

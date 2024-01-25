@@ -24,7 +24,6 @@ public:
     void init(vecDouble x_in, vecDouble y_in);
     double calculate(double t);
     double calc_d(double t);
-    double calc_dd(double t);
 };
 
 class CubicSpline2D
@@ -47,11 +46,10 @@ public:
     double get_last_s();
     void calculate_positions(double &x, double &y, double t);
     double calc_yaw(double t);
-    double calc_curvature(double t);
 };
 
 CubicSpline2D calc_spline_course(vecDouble way_x, vecDouble way_y, vecDouble &rx, 
-                                vecDouble &ry, vecDouble &ryaw, vecDouble &rk, double ds);
+                                vecDouble &ry, vecDouble &ryaw, double ds);
 } //namespace cubic_spline
 
 #endif //CUBIC_SPLINE_HPP_

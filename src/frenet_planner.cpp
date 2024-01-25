@@ -18,8 +18,8 @@ FPList::FPList(double current_speed_in, double current_accel_in, double current_
         {
             FrenetPath lat_samples = calculate_lat(w, ti);
 
-            for (double tv = TARGET_SPEED - SAMPLE_TARGET_SPEED * N_S_SAMPLE; 
-                tv < TARGET_SPEED + SAMPLE_TARGET_SPEED * N_S_SAMPLE; tv += SAMPLE_TARGET_SPEED)
+            for (double tv = TARGET_SPEED - SAMPLE_TARGET_SPEED; 
+                tv < TARGET_SPEED + SAMPLE_TARGET_SPEED; tv += SAMPLE_TARGET_SPEED)
             {
                 FrenetPath path_samples = calculate_long(tv, ti, lat_samples);
                 
@@ -260,7 +260,6 @@ int main(int argc, char **argv)
     MIN_T = 4.0;
     TARGET_SPEED = 30.0 / 3.6;
     SAMPLE_TARGET_SPEED = 5.0 / 3.6;
-    N_S_SAMPLE = 1;
     ROBOT_RADIUS = 2.0;
 
     KJ = 0.1;
@@ -271,15 +270,15 @@ int main(int argc, char **argv)
     KLON = 1.0;
 
     double current_pos = 0.0;
+    double current_speed = 10 / 3.6;
+    double current_accel = 0.0;
+    double current_yaw = 0.0;
     double current_lat_pos = 0.0;
     double current_lat_speed = 0.0;
     double current_lat_accel = 0.0;
-    double current_speed = 10 / 3.6;
-    double current_accel = 0.0;
 
-    double current_phi = 0.0;
-    double current_yaw = 0.0;
-    double current_omega = 0.0;
+    // double current_phi = 0.0;
+    // double current_omega = 0.0;
 
     vecDouble way_x{0, 10, 20, 30, 40, 45, 40, 30, 20, 
                     10, 0, -5, 0, 10, 20, 30, 40, 45, 30, 10, -5, -3};
@@ -288,11 +287,10 @@ int main(int argc, char **argv)
     std::vector<vecDouble> obstacles{{20.0, -10.0},
                                     {30.0, -5.0},
                                     {40.0, 40.0}};
-    vecDouble rx, ry, ryaw, rk;
+    vecDouble rx, ry, ryaw;
     double ds = 0.1;
 
-    cubic_spline::CubicSpline2D spline = cubic_spline::calc_spline_course(way_x, way_y, rx, ry, ryaw, rk, ds);
-
+    cubic_spline::CubicSpline2D spline = cubic_spline::calc_spline_course(way_x, way_y, rx, ry, ryaw, ds);
     for (int step = 0; step < SIM_LOOP; step++) {
         frenet_planner::FrenetPath path = frenet_planner::frenet_optimal_path(spline, current_pos, current_speed, current_accel,
                                             current_lat_pos, current_lat_speed, current_lat_accel, obstacles);
